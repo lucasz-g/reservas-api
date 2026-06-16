@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 import jakarta.validation.constraints.AssertTrue;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -16,6 +17,7 @@ public record ReservaRequestDTO(
     String nomeSolicitante,
 
     @NotBlank(message = "O e-mail do solicitante é obrigatório")
+    @Email(message = "E-mail inválido")
     String email,
 
     @NotNull(message = "A data da reserva é obrigatória")

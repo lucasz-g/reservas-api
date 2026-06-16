@@ -15,6 +15,7 @@ import br.com.garcia.reservas_api.dto.SalaRequestDTO;
 import br.com.garcia.reservas_api.dto.SalaResponseDTO;
 import br.com.garcia.reservas_api.service.SalaService;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
 
 
 @RestController
@@ -42,7 +43,7 @@ public class SalaController {
 
     @Operation(summary = "Criar Sala", description = "Endpoint para criar uma nova sala.")
     @PostMapping("/criar")
-    public ResponseEntity<SalaResponseDTO> criarSala(@RequestBody SalaRequestDTO salaRequestDTO) {
+    public ResponseEntity<SalaResponseDTO> criarSala(@Valid @RequestBody SalaRequestDTO salaRequestDTO) {
         SalaResponseDTO criada = salaService.criarSala(salaRequestDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(criada);
     }

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import br.com.garcia.reservas_api.dto.SalaRequestDTO;
 import br.com.garcia.reservas_api.dto.SalaResponseDTO;
 import br.com.garcia.reservas_api.entity.Sala;
+import br.com.garcia.reservas_api.exceptions.RecursoNaoEncontradoException;
 import br.com.garcia.reservas_api.repository.SalaRepository;
 
 @Service
@@ -42,10 +43,8 @@ public class SalaService {
     }
 
     public SalaResponseDTO buscarSalaPorId(Long id) {
-        Sala sala = salaRepository.findById(id).orElse(null);
-        if (sala == null) {
-            return null;
-        }
+        Sala sala = salaRepository.findById(id)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Sala nao encontrada"));
         // Transformar a entidade Sala encontrada em um SalaResponseDTO e retornar
         return toResponseDTO(sala);
     }

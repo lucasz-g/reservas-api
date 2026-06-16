@@ -11,6 +11,9 @@ import br.com.garcia.reservas_api.dto.ReservaRequestDTO;
 import br.com.garcia.reservas_api.dto.ReservaResponseDTO;
 import br.com.garcia.reservas_api.entity.Reserva;
 import br.com.garcia.reservas_api.entity.Sala;
+import br.com.garcia.reservas_api.entity.StatusReserva;
+import br.com.garcia.reservas_api.exceptions.ConflitoHorarioException;
+import br.com.garcia.reservas_api.exceptions.RecursoNaoEncontradoException;
 import br.com.garcia.reservas_api.repository.ReservaRepository;
 import br.com.garcia.reservas_api.repository.SalaRepository;
 
@@ -29,12 +32,11 @@ public class ReservaService {
 
     public ReservaResponseDTO criarReserva(ReservaRequestDTO reservaRequestDTO) {
         logger.info("Criando reserva para sala ID: {}", reservaRequestDTO.salaId());
-        Sala sala = salaRepository.findById(reservaRequestDTO.salaId())
-                .orElseThrow(() -> new IllegalArgumentException("Sala não encontrada"));
-
+        Sala sala = buscarSala(reservaRequestDTO.salaId());
         sala.validarReserva();
+        validarConflitoHorario(reservaRequestDTO);
 
-        Reserva reservaSalva = reservaRepository.save(toEntity(reservaRequestDTO));
+        Reserva reservaSalva = reservaRepository.save(toEntity(reservaRequestDTO, sala));
         logger.info("Reserva criada com ID: {}", reservaSalva.getId());
         return toDto(reservaSalva);
     }
@@ -66,10 +68,7 @@ public class ReservaService {
 
 
     // Utilitários
-    private Reserva toEntity(ReservaRequestDTO reservaRequestDTO) {
-        Sala sala = salaRepository.findById(reservaRequestDTO.salaId())
-                .orElseThrow(() -> new IllegalArgumentException("Sala não encontrada"));
-
+    private Reserva toEntity(ReservaRequestDTO reservaRequestDTO, Sala sala) {
         Reserva reserva = new Reserva();
         reserva.setSala(sala);
         reserva.setNomeSolicitante(reservaRequestDTO.nomeSolicitante());
@@ -92,8 +91,27 @@ public class ReservaService {
                 reserva.getFinalidade());
     }
 
-    private Reserva optionalBuscaReserva(Long id){
+    private Sala buscarSala(Long id) {
+        return salaRepository.findById(id)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Sala nao encontrada"));
+    }
+
+    private void validarConflitoHorario(ReservaRequestDTO reservaRequestDTO) {
+        boolean existeConflito = reservaRepository
+                .existsBySala_IdAndDataReservaAndStatusAndHoraInicioLessThanAndHoraFimGreaterThan(
+                        reservaRequestDTO.salaId(),
+                        reservaRequestDTO.dataReserva(),
+                        StatusReserva.ATIVA,
+                        reservaRequestDTO.horaFim(),
+                        reservaRequestDTO.horaInicio());
+
+        if (existeConflito) {
+            throw new ConflitoHorarioException("Ja existe reserva para esta sala no horario informado");
+        }
+    }
+
+    private Reserva optionalBuscaReserva(Long id) {
         Optional<Reserva> reserva = reservaRepository.findById(id);
-        return reserva.orElseThrow(() -> new IllegalArgumentException("Reserva não encontrada"));
+        return reserva.orElseThrow(() -> new RecursoNaoEncontradoException("Reserva nao encontrada"));
     }
 }

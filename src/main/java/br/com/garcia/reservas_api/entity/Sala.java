@@ -1,8 +1,6 @@
 package br.com.garcia.reservas_api.entity;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
-
+import br.com.garcia.reservas_api.exceptions.RegraNegocioException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -51,7 +49,7 @@ public class Sala {
     // Validação 
     public void validarReserva() {
         if (status != StatusSala.ATIVA) {
-            throw new IllegalStateException("Sala indisponível");
+            throw new RegraNegocioException("Sala indisponivel para reserva");
         }
     }
 

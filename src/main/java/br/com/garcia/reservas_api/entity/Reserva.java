@@ -3,6 +3,7 @@ package br.com.garcia.reservas_api.entity;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
+import br.com.garcia.reservas_api.exceptions.RegraNegocioException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -69,7 +70,7 @@ public class Reserva {
     // Métodos de negócio
     public void cancelar() {
         if (status == StatusReserva.CANCELADA) {
-            throw new IllegalStateException("Reserva já está cancelada");
+            throw new RegraNegocioException("Reserva ja esta cancelada");
         }
         this.status = StatusReserva.CANCELADA;
     }
