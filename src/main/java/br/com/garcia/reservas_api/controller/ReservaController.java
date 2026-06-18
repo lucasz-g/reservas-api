@@ -32,6 +32,7 @@ public class ReservaController {
         return ResponseEntity.ok().body(reservaResponse);
     }
 
+    @Operation(summary = "Listar Reservas", description = "Endpoint para listar todas as reservas.")
     @GetMapping()
     public ResponseEntity<List<ReservaResponseDTO>> listarReservas() {
         List<ReservaResponseDTO> reservasList = reservaService.listarReservas();
