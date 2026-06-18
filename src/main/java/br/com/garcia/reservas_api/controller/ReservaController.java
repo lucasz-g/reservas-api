@@ -1,5 +1,6 @@
 package br.com.garcia.reservas_api.controller;
 
+import java.net.URI;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
@@ -8,6 +9,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import br.com.garcia.reservas_api.dto.ReservaRequestDTO;
 import br.com.garcia.reservas_api.dto.ReservaResponseDTO;
@@ -27,9 +29,12 @@ public class ReservaController {
 
     @Operation(summary = "Criar Reserva", description = "Endpoint para criar uma nova reserva.")
     @PostMapping("/criar")
-    public ResponseEntity<ReservaResponseDTO> criarReserva(@Valid @RequestBody ReservaRequestDTO reservaRequestDTO) {
+    public ResponseEntity<ReservaResponseDTO> criarReserva(@Valid @RequestBody ReservaRequestDTO reservaRequestDTO, UriComponentsBuilder uriBuilder) {
         ReservaResponseDTO reservaResponse = reservaService.criarReserva(reservaRequestDTO);
-        return ResponseEntity.ok().body(reservaResponse);
+        // Cria a URI do recurso recém-criado.
+        // Exemplo: se o id for 10, a URI gerada será "/reservas/10".
+        URI uri = uriBuilder.path("/reservas/{id}").buildAndExpand(reservaResponse.id()).toUri(); 
+        return ResponseEntity.created(uri).body(reservaResponse);
     }
 
     @Operation(summary = "Listar Reservas", description = "Endpoint para listar todas as reservas.")
